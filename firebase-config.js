@@ -1,3 +1,4 @@
+// firebase-config.js
 const firebaseConfig = {
   apiKey: "AIzaSyCAOtXdPDg-bu4CXLJk1q7FEXbi6d5loc0",
   authDomain: "koty-pwa.firebaseapp.com",
@@ -8,4 +9,5 @@ const firebaseConfig = {
   measurementId: "G-WSV2QP2QF9"
 };
 
+// Eksportowanie konfiguracji jako domyślny eksport
 export default firebaseConfig;

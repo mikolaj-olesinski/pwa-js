@@ -1,4 +1,4 @@
-// Importowanie konfiguracji Firebase
+// main.js
 import firebaseConfig from './firebase-config.js';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
 import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js';
@@ -7,35 +7,51 @@ import { getAnalytics } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase
 // Klucz VAPID - należy go wygenerować w konsoli Firebase
 const vapidKey = 'BChQn_l0Pek-NrtgybswkUDZcUDT4ZQtE5blRA_4Ypium4weT-MZ8nfGjUpQ9nvuRlxgh7wnB_L8FlJjozY-gf0';
 
-window.onload = () => {
+document.addEventListener('DOMContentLoaded', () => {
   'use strict';
 
+  console.log('DOM załadowany - inicjalizacja aplikacji...');
+
   // Inicjalizacja Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const messaging = getMessaging(app);
+  try {
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const messaging = getMessaging(app);
 
-  // Rejestracja Service Workera
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-      .then(registration => {
-        console.log('Service Worker zarejestrowany pomyślnie.', registration.scope);
-        initializeFirebaseMessaging(registration);
-      })
-      .catch((error) => console.error('Błąd rejestracji Service Workera:', error));
-  }
+    console.log('Firebase załadowany pomyślnie');
 
-  // Obsługa powiadomień
-  const notificationButton = document.getElementById('notifications-btn');
+    // Rejestracja Service Workera
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('Service Worker zarejestrowany pomyślnie.', registration.scope);
+          initializeFirebaseMessaging(registration, messaging);
+        })
+        .catch((error) => {
+          console.error('Błąd rejestracji Service Workera:', error);
+        });
+    } else {
+      console.error('Ta przeglądarka nie obsługuje Service Workerów');
+    }
 
-  if (notificationButton) {
-    notificationButton.addEventListener('click', () => {
-      requestNotificationPermission();
-    });
+    // Obsługa powiadomień
+    const notificationButton = document.getElementById('notifications-btn');
+
+    if (notificationButton) {
+      console.log('Znaleziono przycisk powiadomień, dodawanie nasłuchiwacza zdarzeń...');
+      notificationButton.addEventListener('click', () => {
+        console.log('Przycisk powiadomień kliknięty');
+        requestNotificationPermission(messaging);
+      });
+    } else {
+      console.error('Nie znaleziono przycisku powiadomień');
+    }
+  } catch (error) {
+    console.error('Błąd podczas inicjalizacji Firebase:', error);
   }
 
   // Funkcja do inicjalizacji Firebase Messaging
-  function initializeFirebaseMessaging(registration) {
+  function initializeFirebaseMessaging(registration, messaging) {
     // Nasłuchiwanie wiadomości gdy aplikacja jest otwarta
     onMessage(messaging, (payload) => {
       console.log('Otrzymano wiadomość gdy aplikacja jest aktywna:', payload);
@@ -44,13 +60,15 @@ window.onload = () => {
   }
 
   // Funkcja do żądania uprawnień do powiadomień
-  function requestNotificationPermission() {
+  function requestNotificationPermission(messaging) {
+    console.log('Żądanie uprawnień do powiadomień...');
     if ('Notification' in window) {
       Notification.requestPermission()
         .then(permission => {
+          console.log('Status uprawnień:', permission);
           if (permission === 'granted') {
             console.log('Uprawnienia do powiadomień przyznane');
-            subscribeToPushNotifications();
+            subscribeToPushNotifications(messaging);
           } else {
             console.log('Brak uprawnień do powiadomień');
             alert('Aby otrzymywać powiadomienia, musisz wyrazić na to zgodę.');
@@ -66,10 +84,12 @@ window.onload = () => {
   }
 
   // Funkcja do subskrypcji powiadomień push
-  function subscribeToPushNotifications() {
+  function subscribeToPushNotifications(messaging) {
+    console.log('Próba subskrypcji powiadomień push...');
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       navigator.serviceWorker.ready
         .then(registration => {
+          console.log('Service Worker gotowy, pobieranie tokenu FCM...');
           // Pobieranie tokenu FCM
           getToken(messaging, {
             vapidKey: vapidKey,
@@ -82,12 +102,13 @@ window.onload = () => {
                 showTestNotification(registration);
               } else {
                 console.log('Nie można uzyskać tokenu. Poproś o zgodę na powiadomienia.');
-                requestNotificationPermission();
+                requestNotificationPermission(messaging);
               }
             })
             .catch(error => {
               console.error('Błąd podczas pobierania tokenu:', error);
-              alert('Wystąpił błąd podczas konfiguracji powiadomień.');
+              console.error('Szczegóły błędu:', error.message, error.code);
+              alert('Wystąpił błąd podczas konfiguracji powiadomień: ' + error.message);
             });
         })
         .catch(error => {
@@ -108,10 +129,11 @@ window.onload = () => {
 
   // Funkcja do wyświetlania testowej notyfikacji
   function showTestNotification(registration) {
+    console.log('Wyświetlanie testowej notyfikacji...');
     registration.showNotification('Koty internetowe', {
       body: 'Dziękujemy za włączenie powiadomień!',
-      icon: 'images/pwa-icon-192.png',
-      badge: 'images/pwa-icon-128.png',
+      icon: '/images/pwa-icon-192.png',
+      badge: '/images/pwa-icon-128.png',
       vibrate: [100, 50, 100],
       data: {
         url: window.location.href
@@ -121,10 +143,11 @@ window.onload = () => {
 
   // Funkcja do wyświetlania powiadomień podczas aktywnej sesji
   function showNotification(title, body) {
+    console.log('Wyświetlanie powiadomienia w aktywnej sesji:', title, body);
     const options = {
       body: body,
-      icon: 'images/pwa-icon-192.png',
-      badge: 'images/pwa-icon-128.png',
+      icon: '/images/pwa-icon-192.png',
+      badge: '/images/pwa-icon-128.png',
       vibrate: [100, 50, 100],
       data: {
         url: window.location.href
@@ -135,4 +158,4 @@ window.onload = () => {
       registration.showNotification(title, options);
     });
   }
-};
+});

@@ -1,3 +1,4 @@
+// sw.js
 const cacheName = 'koty-pwa-v1';
 const filesToCache = [
   '/',
@@ -33,7 +34,17 @@ const filesToCache = [
 // Zaimportowanie Firebase Messaging SW
 importScripts('https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging-compat.js');
-importScripts('/js/firebase-config.js');
+
+// Manualne zdefiniowanie konfiguracji Firebase zamiast importu
+const firebaseConfig = {
+  apiKey: "AIzaSyCAOtXdPDg-bu4CXLJk1q7FEXbi6d5loc0",
+  authDomain: "koty-pwa.firebaseapp.com",
+  projectId: "koty-pwa",
+  storageBucket: "koty-pwa.firebasestorage.app",
+  messagingSenderId: "839213260571",
+  appId: "1:839213260571:web:c803fcdcd72b72b9db3dbe",
+  measurementId: "G-WSV2QP2QF9"
+};
 
 // Konfiguracja Firebase
 firebase.initializeApp(firebaseConfig);
@@ -42,8 +53,10 @@ const messaging = firebase.messaging();
 
 // Instalacja Service Workera
 self.addEventListener('install', (event) => {
+  console.log('[Service Worker] Instalacja');
   event.waitUntil(
     caches.open(cacheName).then((cache) => {
+      console.log('[Service Worker] Buforowanie plików');
       return cache.addAll(filesToCache);
     })
   );
@@ -73,12 +86,14 @@ self.addEventListener('fetch', (event) => {
 
 // Aktywacja i czyszczenie starych cache'ów
 self.addEventListener('activate', (event) => {
+  console.log('[Service Worker] Aktywacja');
   const cacheWhitelist = [cacheName];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (!cacheWhitelist.includes(cache)) {
+            console.log('[Service Worker] Usuwanie starego cache:', cache);
             return caches.delete(cache);
           }
         })
@@ -89,15 +104,15 @@ self.addEventListener('activate', (event) => {
 
 // Obsługa wiadomości push od Firebase
 messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Otrzymano wiadomość w tle ', payload);
+  console.log('[Service Worker] Otrzymano wiadomość w tle ', payload);
 
   const notificationTitle = payload.notification.title || 'Koty internetowe';
   const notificationOptions = {
     body: payload.notification.body || 'Nowa wiadomość o kotach!',
-    icon: 'images/pwa-icon-192.png',
-    badge: 'images/pwa-icon-128.png',
+    icon: '/images/pwa-icon-192.png',
+    badge: '/images/pwa-icon-128.png',
     vibrate: [100, 50, 100],
-    data: payload.data
+    data: payload.data || {}
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
@@ -105,6 +120,7 @@ messaging.onBackgroundMessage((payload) => {
 
 // Obsługa kliknięcia w powiadomienie
 self.addEventListener('notificationclick', (event) => {
+  console.log('[Service Worker] Kliknięcie w powiadomienie', event);
   event.notification.close();
 
   let url = '/';
