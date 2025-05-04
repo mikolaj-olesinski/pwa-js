@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Rejestracja Service Workera
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
+      navigator.serviceWorker.register('./sw.js')
         .then(registration => {
           console.log('Service Worker zarejestrowany pomyślnie.', registration.scope);
           initializeFirebaseMessaging(registration, messaging);
