@@ -1,0 +1,301 @@
+/* 
+ * Główny plik stylów dla aplikacji "Koty w internecie"
+ * PWA Lab 3 - 2025
+ */
+
+/* Zmienne CSS dla łatwej zmiany motywu */
+:root {
+  --primary-color: #db4938;
+  --secondary-color: #f8a488;
+  --background-color: #fff9f7;
+  --text-color: #333;
+  --nav-hover-color: #ff7456;
+  --footer-bg-color: #f7e7e4;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Reset podstawowych stylów */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+/* Kontener główny */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Nagłówek */
+header {
+  padding: 20px 0;
+  text-align: center;
+  border-bottom: 3px solid var(--primary-color);
+  margin-bottom: 20px;
+}
+
+.title {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  text-shadow: 1px 1px 2px var(--shadow-color);
+}
+
+/* Nawigacja */
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+nav a {
+  color: var(--text-color);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 15px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+nav a:hover, nav a:focus {
+  background-color: var(--primary-color);
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px var(--shadow-color);
+}
+
+/* Główna zawartość */
+main {
+  flex: 1;
+  padding: 20px 0;
+}
+
+main p {
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
+
+.cat-image {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.cat-image img {
+  border-radius: 15px;
+  max-width: 100%;
+  height: auto;
+  box-shadow: 0 8px 20px var(--shadow-color);
+  transition: transform 0.3s ease;
+}
+
+.cat-image img:hover {
+  transform: scale(1.03);
+}
+
+/* Fakty o kotach */
+.facts-list {
+  list-style-position: inside;
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 5px 15px var(--shadow-color);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.facts-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  position: relative;
+  padding-left: 30px;
+}
+
+.facts-list li:last-child {
+  border-bottom: none;
+}
+
+.facts-list li::before {
+  content: "🐾";
+  position: absolute;
+  left: 0;
+  color: var(--primary-color);
+}
+
+/* Sekcja memów */
+.memy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+  margin: 0 auto;
+}
+
+.mem-item {
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px var(--shadow-color);
+  transition: transform 0.3s ease;
+}
+
+.mem-item:hover {
+  transform: translateY(-5px);
+}
+
+.mem-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.mem-item p {
+  padding: 15px;
+  text-align: center;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Stopka */
+footer {
+  margin-top: 30px;
+  padding: 20px 0;
+  text-align: center;
+  background-color: var(--footer-bg-color);
+  border-radius: 10px 10px 0 0;
+}
+
+#notifications-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+#notifications-btn:hover {
+  background-color: var(--nav-hover-color);
+  box-shadow: 0 4px 10px var(--shadow-color);
+}
+
+/* Media queries dla urządzeń mobilnych */
+@media screen and (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+  
+  nav ul {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  nav a {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  .memy-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .facts-list {
+    padding: 15px;
+  }
+  
+  .facts-list li {
+    padding-left: 25px;
+  }
+}
+
+/* Specjalne style dla małych ekranów (telefony) */
+@media screen and (max-width: 480px) {
+  .container {
+    padding: 0 15px;
+  }
+  
+  header {
+    padding: 15px 0;
+  }
+  
+  .title {
+    font-size: 1.8rem;
+  }
+  
+  main p {
+    font-size: 1rem;
+  }
+  
+  .cat-image {
+    margin: 20px 0;
+  }
+  
+  footer {
+    padding: 15px 0;
+  }
+}
+
+/* Dodatkowe style dla iOS PWA */
+@media (display-mode: standalone) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  header {
+    padding-top: 30px;
+  }
+}
+
+/* Animacje */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+main {
+  animation: fadeIn 0.5s ease-in;
+}
+
+/* Styl dla trybu ciemnego (dark mode) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #222;
+    --text-color: #f5f5f5;
+    --footer-bg-color: #333;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+  }
+  
+  .facts-list {
+    background-color: #333;
+  }
+  
+  .facts-list li {
+    border-bottom: 1px solid #444;
+  }
+  
+  .mem-item {
+    background-color: #333;
+  }
+}
