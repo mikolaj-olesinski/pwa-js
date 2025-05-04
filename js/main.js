@@ -1,17 +1,20 @@
 // Importowanie konfiguracji Firebase
-import firebaseConfig from '../firebase-config.js';
+import firebaseConfig from './firebase-config.js';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
 import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js';
 import { getAnalytics } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js';
 
+// Klucz VAPID - należy go wygenerować w konsoli Firebase
+const vapidKey = 'BChQn_l0Pek-NrtgybswkUDZcUDT4ZQtE5blRA_4Ypium4weT-MZ8nfGjUpQ9nvuRlxgh7wnB_L8FlJjozY-gf0';
+
 window.onload = () => {
   'use strict';
-  
+
   // Inicjalizacja Firebase
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
   const messaging = getMessaging(app);
-  
+
   // Rejestracja Service Workera
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
@@ -21,16 +24,16 @@ window.onload = () => {
       })
       .catch((error) => console.error('Błąd rejestracji Service Workera:', error));
   }
-  
+
   // Obsługa powiadomień
   const notificationButton = document.getElementById('notifications-btn');
-  
+
   if (notificationButton) {
     notificationButton.addEventListener('click', () => {
       requestNotificationPermission();
     });
   }
-  
+
   // Funkcja do inicjalizacji Firebase Messaging
   function initializeFirebaseMessaging(registration) {
     // Nasłuchiwanie wiadomości gdy aplikacja jest otwarta
@@ -39,7 +42,7 @@ window.onload = () => {
       showNotification(payload.notification.title, payload.notification.body);
     });
   }
-  
+
   // Funkcja do żądania uprawnień do powiadomień
   function requestNotificationPermission() {
     if ('Notification' in window) {
@@ -50,11 +53,18 @@ window.onload = () => {
             subscribeToPushNotifications();
           } else {
             console.log('Brak uprawnień do powiadomień');
+            alert('Aby otrzymywać powiadomienia, musisz wyrazić na to zgodę.');
           }
+        })
+        .catch(error => {
+          console.error('Błąd podczas żądania uprawnień:', error);
+          alert('Wystąpił błąd podczas próby włączenia powiadomień.');
         });
+    } else {
+      alert('Twoja przeglądarka nie wspiera powiadomień.');
     }
   }
-  
+
   // Funkcja do subskrypcji powiadomień push
   function subscribeToPushNotifications() {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
@@ -62,29 +72,31 @@ window.onload = () => {
         .then(registration => {
           // Pobieranie tokenu FCM
           getToken(messaging, {
-            vapidKey: 'TWÓJ_KLUCZ_VAPID_PUBLIC', // Tutaj należy wstawić klucz VAPID
+            vapidKey: vapidKey,
             serviceWorkerRegistration: registration
           })
-          .then(token => {
-            if (token) {
-              console.log('Token FCM:', token);
-              saveTokenToServer(token);
-              showTestNotification(registration);
-            } else {
-              console.log('Nie można uzyskać tokenu. Poproś o zgodę na powiadomienia.');
-              requestNotificationPermission();
-            }
-          })
-          .catch(error => {
-            console.error('Błąd podczas pobierania tokenu:', error);
-          });
+            .then(token => {
+              if (token) {
+                console.log('Token FCM:', token);
+                saveTokenToServer(token);
+                showTestNotification(registration);
+              } else {
+                console.log('Nie można uzyskać tokenu. Poproś o zgodę na powiadomienia.');
+                requestNotificationPermission();
+              }
+            })
+            .catch(error => {
+              console.error('Błąd podczas pobierania tokenu:', error);
+              alert('Wystąpił błąd podczas konfiguracji powiadomień.');
+            });
         })
         .catch(error => {
           console.error('Błąd podczas subskrypcji powiadomień:', error);
+          alert('Wystąpił błąd podczas konfiguracji powiadomień.');
         });
     }
   }
-  
+
   // Funkcja do wysyłania tokenu do serwera
   function saveTokenToServer(token) {
     // Tutaj normalnie wysłałbyś token do swojego serwera
@@ -93,7 +105,7 @@ window.onload = () => {
     // Na potrzeby testów możesz użyć localStorage
     localStorage.setItem('fcmToken', token);
   }
-  
+
   // Funkcja do wyświetlania testowej notyfikacji
   function showTestNotification(registration) {
     registration.showNotification('Koty internetowe', {
@@ -106,7 +118,7 @@ window.onload = () => {
       }
     });
   }
-  
+
   // Funkcja do wyświetlania powiadomień podczas aktywnej sesji
   function showNotification(title, body) {
     const options = {
@@ -118,7 +130,7 @@ window.onload = () => {
         url: window.location.href
       }
     };
-    
+
     navigator.serviceWorker.ready.then(registration => {
       registration.showNotification(title, options);
     });

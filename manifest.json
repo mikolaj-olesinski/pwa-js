@@ -6,6 +6,10 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#db4938",
+  "permissions": [
+    "notifications"
+  ],
+  "gcm_sender_id": "839213260571",
   "icons": [
     {
       "src": "images/manifest-icon-192.maskable.png",
